@@ -4,7 +4,7 @@ import config
 import requests
 from zhdate import ZhDate
 from wechatpy import WeChatClient
-from datetime import date, datetime,timedelta
+from datetime import date, datetime, timedelta
 from wechatpy.client.api import WeChatMessage
 from apscheduler.schedulers.blocking import BlockingScheduler
 
@@ -142,5 +142,4 @@ data = {
 }
 
 if __name__ == "__main__":
-    # get_task()
-    get_birthday()
+    get_task()
