@@ -104,6 +104,8 @@ def get_task():
     try:
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):
+        end_time = datetime.strftime(datetime.now(), "%Y-%m-%d %H_%M_%S")
+        print('手动终端程序，中断时间: ' + end_time + ' !')
         pass
 
 
