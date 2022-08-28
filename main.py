@@ -88,8 +88,8 @@ def get_send_info():
             send_status = '发送成功'
         else:
             send_status = '发送失败'
-    end_date = datetime.strftime(datetime.now(), "%Y-%m-%d %H_%M_%S")
-    print('结束时间: ' + end_date + ',' + send_status + "!")
+    send_date = datetime.strftime(datetime.now(), "%Y-%m-%d %H_%M_%S")
+    print('发送时间: ' + send_date + ',' + send_status + "!\n明天同一时间会继续发送的，不要关闭程序哦😯")
 
 
 # 获取任务
