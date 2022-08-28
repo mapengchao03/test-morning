@@ -4,7 +4,7 @@ import config
 import requests
 from zhdate import ZhDate
 from wechatpy import WeChatClient
-from datetime import date, datetime
+from datetime import date, datetime,timedelta
 from wechatpy.client.api import WeChatMessage
 from apscheduler.schedulers.blocking import BlockingScheduler
 
@@ -58,12 +58,20 @@ def get_transfer_date():
     return birthday_date
 
 
+# 获取当天零点时刻
+def get_zero_today():
+    now = datetime.now()
+    zero_today = now - timedelta(hours=now.hour, minutes=now.minute, seconds=now.second, microseconds=now.microsecond)
+    return zero_today
+
+
 # 距离生日天数
 def get_birthday():
     birthday_date = get_transfer_date()
-    if birthday_date < datetime.now():
+    zero_today = get_zero_today()
+    if birthday_date < zero_today:
         birthday_date = birthday_date.replace(year=birthday_date.year + 1)
-    return (birthday_date - today).days
+    return (birthday_date - zero_today).days
 
 
 # 获取彩虹屁
@@ -134,4 +142,5 @@ data = {
 }
 
 if __name__ == "__main__":
-    get_task()
+    # get_task()
+    get_birthday()
