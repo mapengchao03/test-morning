@@ -28,8 +28,21 @@ def get_weather():
 
 # 获取相识天数
 def get_days():
-    delta = today - datetime.strptime(config.start_date, "%Y-%m-%d")
+    delta = datetime.now() - datetime.strptime(config.start_date, "%Y-%m-%d")
     return delta.days
+
+
+# 获取彩虹屁
+def get_words():
+    words = requests.get("https://api.shadiao.pro/chp")
+    if words.status_code == 200:
+        return words.json()['data']['text']
+    return '每天都要开心啊臭宝！'
+
+
+# 获取随机颜色
+def get_random_color():
+    return "#%06x" % random.randint(0x000000, 0xFFFF00)
 
 
 # 获取执行时间
@@ -43,10 +56,10 @@ def get_send_time():
 
 # 当天转为字符串
 def get_today():
-    return today.strftime("%Y{}%m{}%d{}").format('年','月','日')
+    return datetime.now().strftime("%Y{}%m{}%d{}").format('年', '月', '日')
 
 
-# 农历转换为阳历
+# 农历转换为阳历,获取生日阳历日期
 def get_transfer_date():
     int_year = date.today().year
     int_month = int(birthday.split('-')[0])
@@ -74,24 +87,28 @@ def get_birthday():
     return (birthday_date - zero_today).days
 
 
-# 获取彩虹屁
-def get_words():
-    words = requests.get("https://api.shadiao.pro/chp")
-    if words.status_code == 200:
-        return words.json()['data']['text']
-    return '每天都要开心啊臭宝！'
-
-
-# 获取随机颜色
-def get_random_color():
-    return "#%06x" % random.randint(0x000000, 0xFFFF00)
+# 获取模版数据
+def get_template_data():
+    data = {
+        "date": {"value": get_today(), "color": get_random_color()},
+        "city": {"value": city},
+        "weather": {"value": get_weather()[0]},
+        "current_temperature": {"value": get_weather()[1], "color": get_random_color()},
+        "wind": {"value": get_weather()[2]},
+        "min_temperature": {"value": get_weather()[3], "color": get_random_color()},
+        "max_temperature": {"value": get_weather()[4], "color": get_random_color()},
+        "love_days": {"value": get_days(), "color": get_random_color()},
+        "birthday": {"value": get_birthday(), "color": get_random_color()},
+        "rainbow": {"value": get_words(), "color": get_random_color()},
+    }
+    return data
 
 
 #  获取发送结果
 def get_send_info():
     send_status = ''
     for user_id in user_ids:
-        res = wm.send_template(user_id, template_id, data)
+        res = wm.send_template(user_id, template_id, get_template_data())
         if res['errmsg'] == 'ok':
             send_status = '发送成功'
         else:
@@ -105,10 +122,13 @@ def get_task():
     send_time = get_send_time()[0]
     send_hour = get_send_time()[1]
     send_minute = get_send_time()[2]
-    start_date = datetime.strftime(today, "%Y-%m-%d %H_%M_%S")
+    start_date = datetime.strftime(datetime.now(), "%Y-%m-%d %H_%M_%S")
     print('当前时间: ' + start_date + ",距离 " + send_time + " 还有一段时间，稍安勿躁.")
     scheduler = BlockingScheduler(timezone='Asia/Shanghai')
     scheduler.add_job(get_send_info, 'cron', hour=send_hour, minute=send_minute)
+    # scheduler.add_job(get_send_info, 'interval', minutes=2, start_date='2022-08-29 20:48:00',
+    #                   end_date='2022-08-31 20:48:00')
+
     try:
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):
@@ -118,7 +138,6 @@ def get_task():
 
 
 # 定义基本数据
-today = datetime.now()
 city = config.city
 birthday = config.birthday
 app_id = config.app_id
@@ -128,18 +147,6 @@ template_id = config.template_id
 # 初始化公众号发送信息接口
 client = WeChatClient(app_id, app_secret)
 wm = WeChatMessage(client)
-data = {
-    "date": {"value": get_today(), "color": get_random_color()},
-    "city": {"value": city},
-    "weather": {"value": get_weather()[0]},
-    "current_temperature": {"value": get_weather()[1], "color": get_random_color()},
-    "wind": {"value": get_weather()[2]},
-    "min_temperature": {"value": get_weather()[3], "color": get_random_color()},
-    "max_temperature": {"value": get_weather()[4], "color": get_random_color()},
-    "love_days": {"value": get_days(), "color": get_random_color()},
-    "birthday": {"value": get_birthday(), "color": get_random_color()},
-    "rainbow": {"value": get_words(), "color": get_random_color()},
-}
 
 if __name__ == "__main__":
     get_task()
